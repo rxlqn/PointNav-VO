@@ -12,10 +12,15 @@ import torch
 
 from habitat import logger
 
+## 加入额外路径
+import sys 
+sys.path.append("/Extra/lwy/habitat/PointNav-VO/")
+
 from pointnav_vo.utils.config_utils import update_config_log
 from pointnav_vo.utils.baseline_registry import baseline_registry
 from pointnav_vo.config.rl_config.default import get_config as get_rl_config
 from pointnav_vo.config.vo_config.default import get_config as get_vo_config
+
 
 
 VIS_TYPE_DICT = {
@@ -36,32 +41,36 @@ def main():
     parser.add_argument(
         "--task-type",
         choices=["rl", "vo"],
-        required=True,
+        required=False,
         help="Specify the task category of experiment.",
+        default="rl"
     )
     parser.add_argument(
         "--noise",
         type=int,
-        required=True,
+        required=False,
         help="Specify whether enable noisy environment.",
+        default=1
     )
     parser.add_argument(
         "--run-type",
         choices=["train", "eval"],
-        required=True,
+        required=False,
         help="run type of the experiment (train or eval)",
+        default="train"
     )
     parser.add_argument(
         "--exp-config",
         type=str,
-        required=True,
+        required=False,
         help="path to config yaml containing info about experiment",
+        default="/Extra/lwy/habitat/PointNav-VO/configs/rl/ddppo_pointnav.yaml"
     )
     parser.add_argument(
-        "--n-gpu", type=str, required=True, help="timestamp for current executing."
+        "--n-gpu", type=str, required=False, help="timestamp for current executing.", default="1"
     )
     parser.add_argument(
-        "--cur-time", type=str, required=True, help="timestamp for current executing."
+        "--cur-time", type=str, required=False, help="timestamp for current executing.", default="test"
     )
     parser.add_argument(
         "opts",
