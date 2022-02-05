@@ -166,6 +166,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
 
         return results
 
+    ## rollout 里的数据是128+1
     def _collect_rollout_step(
         self, rollouts, current_episode_reward, running_episode_stats
     ):
@@ -176,6 +177,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
         t_sample_action = time.time()
         # sample actions
         with torch.no_grad():
+            ## 提取当前状态
             step_observation = {
                 k: v[rollouts.step] for k, v in rollouts.observations.items()
             }
@@ -185,10 +187,10 @@ class PPOTrainer(BaseRLTrainerWithVO):
                 actions,
                 actions_log_probs,
                 recurrent_hidden_states,
-            ) = self.actor_critic.act(
+            ) = self.actor_critic.act(          ## policy继承的act，step0出是初始化全0，所以前一个时刻的info就是取的当前step
                 step_observation,
-                rollouts.recurrent_hidden_states[rollouts.step],
-                rollouts.prev_actions[rollouts.step],
+                rollouts.recurrent_hidden_states[rollouts.step],    ## hidden state
+                rollouts.prev_actions[rollouts.step],               ## rollouts长度是max_len+1
                 rollouts.masks[rollouts.step],
             )
 
@@ -198,6 +200,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
 
         t_step_env = time.time()
 
+        ## env.step 遍历所有的环境
         outputs = self.envs.step([a[0].item() for a in actions])
         observations, rewards, dones, infos = [list(x) for x in zip(*outputs)]
 
@@ -226,7 +229,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
                         local_delta_states,
                         local_delta_states_std,
                         extra_infos,
-                    ) = self._compute_local_delta_states_from_vo(
+                    ) = self._compute_local_delta_states_from_vo(       ## 用视觉里程计估计
                         self._prev_obs[i], observations[i], actions[i].cpu().item(),
                     )
                     tmp_goal = compute_goal_pos(
@@ -239,6 +242,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
             self._prev_obs = observations
 
         t_update_stats = time.time()
+        ## 转成batch num_env 
         batch = batch_obs(observations, device=self.device)
         rewards = torch.tensor(
             rewards, dtype=torch.float, device=current_episode_reward.device
@@ -250,7 +254,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
             dtype=torch.float,
             device=current_episode_reward.device,
         )
-
+        ## log
         current_episode_reward += rewards
         running_episode_stats["reward"] += (1 - masks) * current_episode_reward
         running_episode_stats["count"] += 1 - masks
@@ -271,6 +275,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
             with torch.no_grad():
                 batch["visual_features"] = self._encoder(batch)
 
+        ## 把数据存入replaybuffer
         rollouts.insert(
             batch,
             recurrent_hidden_states,
@@ -291,6 +296,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
             last_observation = {
                 k: v[rollouts.step] for k, v in rollouts.observations.items()
             }
+            ## 用replaybuffer中的数据推理next-value
             next_value = self.actor_critic.get_value(
                 last_observation,
                 rollouts.recurrent_hidden_states[rollouts.step],

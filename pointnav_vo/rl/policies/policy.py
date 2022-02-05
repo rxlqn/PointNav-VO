@@ -28,9 +28,11 @@ class Policy(nn.Module):
     def act(
         self, observations, rnn_hidden_states, prev_actions, masks, deterministic=False,
     ):
+        ## 编码器提取feature 输入的是当前观测状态，隐藏层状态，前一个时刻的动作和前一个时刻的mask（来mask 前一个时刻hidden_state）
         features, rnn_hidden_states = self.net(
             observations, rnn_hidden_states, prev_actions, masks
         )
+        ## 输出动作和价值函数
         distribution = self.action_distribution(features)
         value = self.critic(features)
 

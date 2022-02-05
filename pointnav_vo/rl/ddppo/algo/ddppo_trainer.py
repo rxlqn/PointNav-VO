@@ -155,7 +155,7 @@ class DDPPOTrainer(PPOTrainer):
                 }
             )
 
-        if not self.config.RL.DDPPO.train_encoder:
+        if not self.config.RL.DDPPO.train_encoder:      ## 如果不训练encoder，那么视觉编码器的参数都是不可反传的
             self._static_encoder = True
             for param in self.actor_critic.net.visual_encoder.parameters():
                 param.requires_grad_(False)
@@ -269,7 +269,7 @@ class DDPPOTrainer(PPOTrainer):
             )
             with torch.no_grad():
                 batch["visual_features"] = self._encoder(batch)
-
+        ## 初始化rollouts
         rollouts = RolloutStorage(
             ppo_cfg.num_steps,
             self.envs.num_envs,
@@ -392,6 +392,7 @@ class DDPPOTrainer(PPOTrainer):
 
                 count_steps_delta = 0
                 self.agent.eval()
+                ## 与仿真环境交互，收集推理数据
                 for step in range(ppo_cfg.num_steps):
 
                     (
@@ -417,11 +418,11 @@ class DDPPOTrainer(PPOTrainer):
                         break
 
                 num_rollouts_done_store.add("num_done", 1)
-
+                ## 设置为训练模式
                 self.agent.train()
                 if self._static_encoder:
                     self._encoder.eval()
-
+                ## 用收集的数据训练网络，更新智能体
                 (
                     delta_pth_time,
                     value_loss,
@@ -440,7 +441,7 @@ class DDPPOTrainer(PPOTrainer):
 
                 for i, k in enumerate(stats_ordering):
                     window_episode_stats[k].append(stats[i].clone())
-
+                ## GPU之间共享数据
                 stats = torch.tensor(
                     [value_loss, action_loss, count_steps_delta], device=self.device,
                 )

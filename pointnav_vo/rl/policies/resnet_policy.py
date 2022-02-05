@@ -21,7 +21,7 @@ from pointnav_vo.rl.policies.policy import Net, Policy
 
 GOAL_POLAR_DIM = 2
 
-
+## 继承policy的函数
 @baseline_registry.register_policy(name="resnet_rnn_policy")
 class PointNavResNetPolicy(Policy):
     def __init__(
@@ -204,7 +204,7 @@ class PointNavResNetNet(Net):
         rnn_input_size += 32
 
         self._hidden_size = hidden_size
-
+        ## 视觉编码器
         self.visual_encoder = ResNetEncoder(
             observation_space,
             baseplanes=resnet_baseplanes,
@@ -221,7 +221,7 @@ class PointNavResNetNet(Net):
                 nn.Linear(np.prod(self.visual_encoder.output_shape), hidden_size),
                 nn.ReLU(True),
             )
-
+        ## 状态编码器 后面改为transformer state encoder
         self.state_encoder = RNNStateEncoder(
             (0 if self.is_blind else self._hidden_size) + rnn_input_size,
             self._hidden_size,

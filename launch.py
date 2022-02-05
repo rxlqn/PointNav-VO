@@ -37,32 +37,35 @@ if __name__ == "__main__":
     parser.add_argument(
         "--task-type",
         choices=["rl", "vo"],
-        required=True,
+        required=False,
         help="Specify the category of the task",
+        default="rl"
     )
     parser.add_argument(
         "--noise",
         type=int,
-        required=True,
+        required=False,
         help="Whether adding noise into environment",
+        default=1
     )
     parser.add_argument(
         "--run-type",
         choices=["train", "eval"],
-        required=True,
+        required=False,
         help="run type of the experiment (train or eval)",
+        default="train"
     )
     parser.add_argument(
-        "--repo-path", type=str, required=True, help="path to PointNav repo",
+        "--repo-path", type=str, required=False, help="path to PointNav repo", default="/Extra/lwy/habitat/PointNav-VO/"
     )
     parser.add_argument(
-        "--n_gpus", type=int, required=True, help="path to PointNav repo",
+        "--n_gpus", type=int, required=False, help="path to PointNav repo", default=1
     )
     parser.add_argument(
-        "--addr", type=str, required=True, help="master address",
+        "--addr", type=str, required=False, help="master address", default = DEFAULT_ADDR
     )
     parser.add_argument(
-        "--port", type=str, required=True, help="master port",
+        "--port", type=str, required=False, help="master port", default = DEFAULT_PORT
     )
 
     args = parser.parse_args()

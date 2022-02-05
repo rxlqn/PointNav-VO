@@ -38,6 +38,7 @@ class RNNStateEncoder(nn.Module):
             elif "bias" in name:
                 nn.init.constant_(param, 0)
 
+    ## 不知道这里为什么LSTM要乘2
     @property
     def num_recurrent_layers(self):
         return self._num_recurrent_layers * (2 if "LSTM" in self._rnn_type else 1)
