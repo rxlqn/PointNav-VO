@@ -183,6 +183,7 @@ class DDPPOTrainer(PPOTrainer):
         Returns:
             None
         """
+        ## 分布式初始化
         self.local_rank, tcp_store = init_distrib_slurm(
             self.config.RL.DDPPO.distrib_backend
         )
@@ -235,10 +236,10 @@ class DDPPOTrainer(PPOTrainer):
                     )
                 )
             )
-
+        ## 环境初始化
         observations = self.envs.reset()
         batch = batch_obs(observations)
-
+        ## 世界坐标转成相机坐标
         if self.config.RL.TUNE_WITH_VO:
             self._prev_obs = observations
             self._prev_goal_positions = []
@@ -279,7 +280,7 @@ class DDPPOTrainer(PPOTrainer):
             num_recurrent_layers=self.actor_critic.net.num_recurrent_layers,
         )
         rollouts.to(self.device)
-
+        ## 把env.reset初始化的数据拷贝到replaybuffer 0 中
         for sensor in rollouts.observations:
             rollouts.observations[sensor][0].copy_(batch[sensor])
 
@@ -346,7 +347,7 @@ class DDPPOTrainer(PPOTrainer):
             if self.world_rank == 0
             else contextlib.suppress()
         ) as writer:
-
+            ## 更新次数的大循环
             for update in range(start_update, self.config.NUM_UPDATES):
                 if ppo_cfg.use_linear_lr_decay:
                     lr_scheduler.step()

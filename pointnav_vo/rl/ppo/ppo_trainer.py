@@ -214,7 +214,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
 
             for i in range(len(observations)):
                 if dones[i]:
-                    # episode ends
+                    # episode ends  如果episode结束了要重新初始化相对位姿
                     cur_episode = self.envs.current_episodes()[i]
                     dx, _, dz = cur_episode.start_position
                     dyaw = 2 * np.arctan2(

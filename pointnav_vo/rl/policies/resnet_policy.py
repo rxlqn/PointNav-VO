@@ -255,6 +255,7 @@ class PointNavResNetNet(Net):
             x.append(visual_feats)
 
         # if IntegratedPointGoalGPSAndCompassSensor.cls_uuid in observations:
+        ## GPS+compass embedding
         if "pointgoal_with_gps_compass" in observations:
             # goal_observations = observations[
             #     IntegratedPointGoalGPSAndCompassSensor.cls_uuid

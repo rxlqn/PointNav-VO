@@ -5,18 +5,18 @@ ENGINE_NAME: "efficient_ddppo"
 ENV_NAME: "NavRLEnv"
 SENSORS: ["DEPTH_SENSOR", "RGB_SENSOR"]
 NUM_UPDATES: 5000000
-NUM_PROCESSES: 3
+NUM_PROCESSES: 1
 SIMULATOR_GPU_ID: 0
 TORCH_GPU_ID: 0
 
 # logging settings
-LOG_DIR: "train_log"
-LOG_FILE: "train_log/train.log"
-INFO_DIR: "train_log/infos"
-CHECKPOINT_FOLDER: "train_log/checkpoints"
-TENSORBOARD_DIR: "train_log/tb"
+LOG_DIR: "test_log"
+LOG_FILE: "test_log/train.log"
+INFO_DIR: "test_log/infos"
+CHECKPOINT_FOLDER: "test_log/checkpoints"
+TENSORBOARD_DIR: "test_log/tb"
 VIDEO_OPTION: []   # choices: ["none", "disk", "tensorboard"], "none" is used for storing image info but not generating video
-VIDEO_DIR: "train_log/videos"
+VIDEO_DIR: "test_log/videos"
 CHECKPOINT_INTERVAL: 1000
 LOG_INTERVAL: 10
 

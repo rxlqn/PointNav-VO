@@ -64,7 +64,7 @@ def main():
         type=str,
         required=False,
         help="path to config yaml containing info about experiment",
-        default="/Extra/lwy/habitat/PointNav-VO/configs/rl/ddppo_pointnav.yaml"
+        default="/Extra/lwy/habitat/PointNav-VO/configs/rl/ddppo_pointnav_test.yaml"
     )
     parser.add_argument(
         "--n-gpu", type=str, required=False, help="timestamp for current executing.", default="1"
