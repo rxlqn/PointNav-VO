@@ -29,7 +29,7 @@ class Policy(nn.Module):
         self, observations, rnn_hidden_states, prev_actions, masks, deterministic=False,
     ):
         ## 编码器提取feature 输入的是当前观测状态，隐藏层状态，前一个时刻的动作和前一个时刻的mask（来mask 前一个时刻hidden_state）
-        features, rnn_hidden_states = self.net(
+        features, rnn_hidden_states, _ = self.net(
             observations, rnn_hidden_states, prev_actions, masks
         )
         ## 输出动作和价值函数
@@ -46,22 +46,22 @@ class Policy(nn.Module):
         return value, action, action_log_probs, rnn_hidden_states
 
     def get_value(self, observations, rnn_hidden_states, prev_actions, masks):
-        features, _ = self.net(observations, rnn_hidden_states, prev_actions, masks)
+        features, _, _ = self.net(observations, rnn_hidden_states, prev_actions, masks)
         return self.critic(features)
 
     def evaluate_actions(
         self, observations, rnn_hidden_states, prev_actions, masks, action
     ):
-        features, rnn_hidden_states = self.net(
+        features, rnn_hidden_states, index = self.net(
             observations, rnn_hidden_states, prev_actions, masks
         )
         distribution = self.action_distribution(features)
         value = self.critic(features)
-
+        action = action[index]
         action_log_probs = distribution.log_probs(action)
         distribution_entropy = distribution.entropy().mean()
 
-        return value, action_log_probs, distribution_entropy, rnn_hidden_states
+        return value, action_log_probs, distribution_entropy, rnn_hidden_states, index
 
 
 class CriticHead(nn.Module):

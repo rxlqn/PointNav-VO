@@ -127,7 +127,7 @@ class RolloutStorage:
             "trainer mini batches ({}).".format(num_processes, num_mini_batch)
         )
         num_envs_per_batch = num_processes // num_mini_batch
-        perm = torch.randperm(num_processes)
+        perm = torch.randperm(num_processes)        ## 生成随机数
         for start_ind in range(0, num_processes, num_envs_per_batch):
             observations_batch = defaultdict(list)
 
@@ -148,10 +148,13 @@ class RolloutStorage:
                         self.observations[sensor][: self.step, ind]
                     )
 
+                ## 应该拿到全部的hidden states?
+                # recurrent_hidden_states_batch.append(
+                #     self.recurrent_hidden_states[0, :, ind]
+                # )
                 recurrent_hidden_states_batch.append(
-                    self.recurrent_hidden_states[0, :, ind]
+                    self.recurrent_hidden_states[: self.step, :, ind]
                 )
-
                 actions_batch.append(self.actions[: self.step, ind])
                 prev_actions_batch.append(self.prev_actions[: self.step, ind])
                 value_preds_batch.append(self.value_preds[: self.step, ind])
@@ -178,8 +181,9 @@ class RolloutStorage:
             adv_targ = torch.stack(adv_targ, 1)
 
             # States is just a (num_recurrent_layers, N, -1) tensor
+            # T num N 512
             recurrent_hidden_states_batch = torch.stack(
-                recurrent_hidden_states_batch, 1
+                recurrent_hidden_states_batch, 2
             )
 
             # Flatten the (T, N, ...) tensors to (T * N, ...)

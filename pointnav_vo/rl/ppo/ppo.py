@@ -67,11 +67,13 @@ class PPO(nn.Module):
         dist_entropy_epoch = 0
 
         for e in range(self.ppo_epoch):
-            data_generator = rollouts.recurrent_generator(
+            ## 数据按照minibatch打包，其实可以分场景，这样的话就能得到完整的episode了
+            ## 注：他这里是num_mini_batch不是batchsize 所以num越大循环次数越多
+            data_generator = rollouts.recurrent_generator(  ## 返回一个生成器
                 advantages, self.num_mini_batch
             )
 
-            for sample in data_generator:
+            for sample in data_generator:       ## 分batch计算更新
                 (
                     obs_batch,
                     recurrent_hidden_states_batch,
@@ -89,14 +91,19 @@ class PPO(nn.Module):
                     values,
                     action_log_probs,
                     dist_entropy,
-                    _,
-                ) = self.actor_critic.evaluate_actions(
-                    obs_batch,
-                    recurrent_hidden_states_batch,
+                    _, index
+                ) = self.actor_critic.evaluate_actions( 
+                    obs_batch,                          ## T*N D
+                    recurrent_hidden_states_batch,      ## num_layer N D
                     prev_actions_batch,
                     masks_batch,
                     actions_batch,
                 )
+                ## 根据done的位置进行重新采样 value_preds_batch, return_batch, old_action_log_probs_batch, adv_targ
+                value_preds_batch = value_preds_batch[index]
+                return_batch = return_batch[index]
+                old_action_log_probs_batch = old_action_log_probs_batch[index]
+                adv_targ = adv_targ[index]
 
                 ratio = torch.exp(action_log_probs - old_action_log_probs_batch)
                 surr1 = ratio * adv_targ

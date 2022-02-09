@@ -200,7 +200,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
 
         t_step_env = time.time()
 
-        ## env.step 遍历所有的环境
+        ## env.step 遍历所有的环境，auto_reset失败了会自动重启
         outputs = self.envs.step([a[0].item() for a in actions])
         observations, rewards, dones, infos = [list(x) for x in zip(*outputs)]
 
@@ -248,7 +248,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
             rewards, dtype=torch.float, device=current_episode_reward.device
         )
         rewards = rewards.unsqueeze(1)
-
+        ## 如果环境结束mask是0
         masks = torch.tensor(
             [[0.0] if done else [1.0] for done in dones],
             dtype=torch.float,
@@ -296,7 +296,7 @@ class PPOTrainer(BaseRLTrainerWithVO):
             last_observation = {
                 k: v[rollouts.step] for k, v in rollouts.observations.items()
             }
-            ## 用replaybuffer中的数据推理next-value
+            ## 用replaybuffer中最后一步的数据推理next-value,这里加detach了不用反传
             next_value = self.actor_critic.get_value(
                 last_observation,
                 rollouts.recurrent_hidden_states[rollouts.step],

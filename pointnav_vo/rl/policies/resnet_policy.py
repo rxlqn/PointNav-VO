@@ -278,6 +278,6 @@ class PointNavResNetNet(Net):
         x.append(prev_actions)
 
         x = torch.cat(x, dim=1)
-        x, rnn_hidden_states = self.state_encoder(x, rnn_hidden_states, masks)
+        x, rnn_hidden_states, index = self.state_encoder(x, rnn_hidden_states, masks)
 
-        return x, rnn_hidden_states
+        return x, rnn_hidden_states, index

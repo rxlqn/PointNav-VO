@@ -5,7 +5,7 @@ ENGINE_NAME: "efficient_ddppo"
 ENV_NAME: "NavRLEnv"
 SENSORS: ["DEPTH_SENSOR", "RGB_SENSOR"]
 NUM_UPDATES: 5000000
-NUM_PROCESSES: 1
+NUM_PROCESSES: 2
 SIMULATOR_GPU_ID: 0
 TORCH_GPU_ID: 0
 
@@ -85,7 +85,7 @@ RL:
     # Initialize with pretrained weights
     pretrained: False
     # Visual encoder backbone
-    pretrained_weights: "pretrained_ckpt.pth"
+    pretrained_weights: "train_log/seed_1-rl-train-vo_1-noise_rgb_1_depth_1_act_1-depth_sensor_rgb_sensor-model_resnet_rnn_policy-visual_resnet18-rnn_GRU_2-updates_5000000-minibatch_2-ngpu_4-proc_3-lr_0.00025-20220206_221116691736/checkpoints/ckpt_4.update_4000.frames_6111411.pth" 
     # Initialize just the visual encoder backbone with pretrained weights
     pretrained_encoder: False
     # Whether or not the visual encoder backbone will be trained.
